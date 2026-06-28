@@ -1,0 +1,2 @@
+# This project is currently a pure frontend application (HTML, CSS, JavaScript).
+# No Python dependencies are required at this time.

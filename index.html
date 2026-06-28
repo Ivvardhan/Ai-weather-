@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI – AI Weather modAI</title>
+  <meta name="description"
+    content="AetherAI uses artificial intelligence to deliver hyper-accurate weather forecasts, real-time atmospheric analysis, and personalized climate insights for any location on Earth." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@300;400;500;600;700&display=swap"
+    rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+
+  <!-- ───── Animated Background Canvas ───── -->
+  <canvas id="bg-canvas"></canvas>
+
+  <!-- Floating Menu -->
+  <div class="floating-menu-btn" onclick="toggleSidebar()">
+    <span class="menu-text">Menu</span>
+    <div class="menu-icon-circle">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+        stroke-linejoin="round">
+        <line x1="3" y1="12" x2="21" y2="12"></line>
+        <line x1="3" y1="6" x2="21" y2="6"></line>
+        <line x1="3" y1="18" x2="21" y2="18"></line>
+      </svg>
+    </div>
+  </div>
+
+
+  <!-- Sidebar Overlay -->
+  <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-logo"><span class="logo-icon">🌐</span> Weather mod<strong>AI</strong></div>
+      <button class="close-btn" onclick="toggleSidebar()">×</button>
+    </div>
+    <ul class="sidebar-links">
+      <li><a href="#" class="sidebar-link" id="nav-home" onclick="switchPage('home')">Home</a></li>
+      <li><a href="#" class="sidebar-link" id="nav-forecast" onclick="switchPage('forecast')">Forecast</a></li>
+      <li><a href="#" class="sidebar-link" id="nav-bulletin" onclick="switchPage('bulletin')">Bulletins</a></li>
+      <li><a href="#" class="sidebar-link" id="nav-map" onclick="switchPage('map')">Precipitation Map</a></li>
+      <li><a href="#" class="sidebar-link" id="nav-maps" onclick="switchPage('maps')">Maps</a></li>
+    </ul>
+  </aside>
+
+  <!-- ───── PAGE: HOME ───── -->
+  <div id="page-home" class="view-page active">
+    <!-- ───── Hero Section ───── -->
+    <section class="hero" id="hero">
+      <div class="hero-bg-img"></div>
+      <div class="hero-content">
+        <div class="hero-badge">
+          <span class="badge-dot"></span> AI-Powered • Real-Time
+        </div>
+        <h1 class="hero-title">Weather modAI</h1>
+
+
+        <!-- Search Bar -->
+        <div class="search-wrapper">
+          <div class="search-bar" id="search-bar">
+            <span class="search-icon">🔍</span>
+            <input type="text" id="city-input" placeholder="Search any city, country or coordinates…"
+              autocomplete="off" />
+            <button class="location-btn" id="location-btn" onclick="useCurrentLocation()"
+              aria-label="Use precise location" title="Use precise location">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                <circle cx="12" cy="12" r="6" />
+                <circle cx="12" cy="12" r="3" fill="currentColor" stroke="none" />
+                <line x1="12" y1="2" x2="12" y2="6" />
+                <line x1="12" y1="18" x2="12" y2="22" />
+                <line x1="2" y1="12" x2="6" y2="12" />
+                <line x1="18" y1="12" x2="22" y2="12" />
+              </svg>
+            </button>
+            <button class="search-btn" id="search-btn" onclick="searchWeather()">
+              <span>Predict</span>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <path d="M5 12h14M12 5l7 7-7 7" />
+              </svg>
+            </button>
+          </div>
+          <div class="search-suggestions" id="search-suggestions"></div>
+          <!-- Favourite Locations -->
+          <div class="saved-locations-wrapper" id="saved-locations-wrapper" style="display: none;">
+            <div class="saved-locations-title">❤️ Favourite Locations</div>
+            <div class="saved-chips" id="saved-chips"></div>
+          </div>
+          <div class="search-chips">
+            <button class="chip" onclick="loadCity('Mumbai')">Mumbai</button>
+            <button class="chip" onclick="loadCity('Delhi')">Delhi</button>
+            <button class="chip" onclick="loadCity('Chennai')">Chennai</button>
+            <button class="chip" onclick="loadCity('Kolkata')">Kolkata</button>
+            <button class="chip" onclick="loadCity('Bangalore')">Bangalore</button>
+            <button class="chip" onclick="loadCity('Hyderabad')">Hyderabad</button>
+            <button class="chip" onclick="loadCity('Jaipur')">Jaipur</button>
+          </div>
+        </div>
+
+        <!-- Model Selector -->
+        <div class="model-selector-wrap">
+          <div class="model-label">🛰️ Select Forecast Model</div>
+          <div class="model-selector" id="model-selector"></div>
+          <div class="model-update-time" id="model-update-time"
+            style="text-align: center; font-size: 0.75rem; color: var(--text-muted); margin-top: 10px; font-weight: 500;">
+          </div>
+        </div>
+      </div>
+
+      <!-- Floating Weather Orbs -->
+      <div class="orb orb-1"></div>
+      <div class="orb orb-2"></div>
+      <div class="orb orb-3"></div>
+    </section>
+
+    <main class="dashboard">
+      <!-- Current Weather Card -->
+      <section class="current-weather" id="current-weather">
+        <div class="cw-left">
+          <div class="cw-location">
+            <span class="pin-icon">📍</span>
+            <span id="cw-city">–</span>
+            <span id="cw-country" class="cw-country"></span>
+            <button id="save-location-btn" class="save-btn" onclick="toggleSaveCurrentLocation()"
+              aria-label="Favourite this location" title="Add to Favourites">
+              <span class="star-icon">☆</span>
+              <span class="btn-text">Favourite</span>
+            </button>
+            <button id="refresh-data-btn" class="save-btn" style="margin-left: 8px;" onclick="refreshCurrentLocation()"
+              aria-label="Refresh Data" title="Fetch latest model updates">
+              <span class="btn-text">🔄 Refresh</span>
+            </button>
+          </div>
+          <div class="cw-date" id="cw-date">–</div>
+          <div class="cw-temp-wrap">
+            <div class="cw-temp" id="cw-temp">–</div>
+            <div class="cw-unit">°C</div>
+          </div>
+          <div class="cw-desc" id="cw-desc">–</div>
+          <div class="cw-feels">Feels like <span id="cw-feels">–</span>°C</div>
+
+          <div class="cw-stats-row">
+            <div class="cw-stat" title="Humidity">
+              <div class="stat-icon">💧</div>
+              <div class="stat-val" id="cw-humidity">–</div>
+              <div class="stat-lbl">Humidity</div>
+            </div>
+            <div class="cw-stat" title="Wind Speed">
+              <div class="stat-icon">💨</div>
+              <div class="stat-val" id="cw-wind">–</div>
+              <div class="stat-lbl">Wind</div>
+            </div>
+            <div class="cw-stat" title="UV Index">
+              <div class="stat-icon">☀️</div>
+              <div class="stat-val" id="cw-uv">–</div>
+              <div class="stat-lbl">UV Index</div>
+            </div>
+            <div class="cw-stat" title="Visibility">
+              <div class="stat-icon">👁️</div>
+              <div class="stat-val" id="cw-visibility">–</div>
+              <div class="stat-lbl">Visibility</div>
+            </div>
+          </div>
+
+          <div id="cw-rain-statement" style="margin-top: 16px; padding: 12px; background: rgba(0, 212, 255, 0.05); border: 1px solid rgba(0, 212, 255, 0.2); border-radius: 8px; font-size: 0.9rem; color: var(--accent-cyan); font-weight: 500; display: none;">
+            <!-- Dynamic statement goes here -->
+          </div>
+
+        </div>
+
+        <div class="cw-right">
+          <div class="cw-weather-icon" id="cw-icon">🌤️</div>
+          <div class="cw-ai-badge">
+            <span class="ai-dot"></span> AI Confidence: <strong id="cw-confidence">–</strong>
+          </div>
+          <div class="cw-model-source" id="cw-model-src">–</div>
+          <div class="cw-sun-row">
+            <div class="sun-item">
+              <div class="sun-icon">🌅</div>
+              <div class="sun-lbl">Sunrise</div>
+              <div class="sun-val" id="cw-sunrise">–</div>
+            </div>
+            <div class="sun-divider"></div>
+            <div class="sun-item">
+              <div class="sun-icon">🌇</div>
+              <div class="sun-lbl">Sunset</div>
+              <div class="sun-val" id="cw-sunset">–</div>
+            </div>
+          </div>
+          <div class="pressure-row">
+            <div class="pressure-item">
+              <span>🌡️ Pressure</span>
+              <strong id="cw-pressure">–</strong>
+            </div>
+            <div class="pressure-item">
+              <span>🌫️ AQI</span>
+              <strong id="cw-aqi">–</strong>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- ───── PAGE: FORECAST ───── -->
+  <div id="page-forecast" class="view-page">
+    <div class="page-top-padding"></div>
+    <main class="dashboard">
+      <!-- AI Weather Consensus & Processing Pipeline -->
+      <section class="pipeline-section" id="ai-pipeline-section" style="display:none">
+        <div class="section-header">
+          <h2>🧠 AI Weather Prediction</h2>
+          <span class="section-badge font-orange">Ensemble Blending Process</span>
+        </div>
+
+        <div class="pipeline-container">
+          <!-- Input Sources Grid -->
+          <div class="pipeline-sources-grid" id="pipeline-sources-grid">
+            <!-- Filled by JS: IMD, ECMWF, GFS, ICON, ACCESS, wttr -->
+          </div>
+
+          <!-- Central Synthesis Node -->
+          <div class="pipeline-center-node">
+            <div class="synthesis-core">
+              <div class="synthesis-pulse"></div>
+              <div class="synthesis-icon">⚡</div>
+              <div class="synthesis-title">AI Ensemble Core</div>
+              <div class="synthesis-status" id="synthesis-status">Aligning grids...</div>
+            </div>
+          </div>
+
+          <!-- Consensus Blended Output -->
+          <div class="pipeline-output-card">
+            <div class="output-badge">AI Calculated</div>
+            <div class="output-temp-wrap">
+              <div class="output-temp" id="pipeline-output-temp">–°</div>
+              <div class="output-lbl">Weighted Blend</div>
+            </div>
+            <div class="output-stats-mini">
+              <div class="out-stat">💧 <span id="pipeline-output-humidity">–</span></div>
+              <div class="out-stat">💨 <span id="pipeline-output-wind">–</span></div>
+              <div class="out-stat">☔ <span id="pipeline-output-rain">–</span></div>
+            </div>
+            <div class="output-model-breakdown">
+              <span>Sub-continent bias:</span>
+              <strong>India-based</strong>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Hourly Forecast -->
+      <section class="hourly-section" id="forecast">
+        <div class="section-header">
+          <h2>⏱️ Hourly Forecast</h2>
+          <span class="section-badge">Next 24 Hours</span>
+        </div>
+        <div class="hourly-scroll">
+          <div class="hourly-track" id="hourly-track">
+            <!-- Populated via JS -->
+          </div>
+        </div>
+      </section>
+
+      <!-- 7-Day Forecast -->
+      <section class="weekly-section">
+        <div class="section-header">
+          <h2>📅 7-Day AI Forecast</h2>
+          <span class="section-badge">Deep Learning Model</span>
+        </div>
+        <div class="weekly-grid" id="weekly-grid">
+          <!-- Populated via JS -->
+        </div>
+      </section>
+
+      <!-- Model Comparison Section -->
+      <section class="comparison-section" id="comparison-section" style="display:none">
+        <div class="section-header">
+          <h2>🔬 Multi-Model Comparison</h2>
+          <div class="divergence-info" id="divergence-info"></div>
+        </div>
+        <div class="comparison-grid" id="comparison-grid"></div>
+      </section>
+
+      <!-- Temperature Chart -->
+      <section class="chart-section">
+        <div class="section-header">
+          <h2>📈 Temperature Trend</h2>
+          <div class="chart-tabs">
+            <button class="chart-tab active" onclick="switchChart('temp')" id="tab-temp">Temperature</button>
+            <button class="chart-tab" onclick="switchChart('humidity')" id="tab-humidity">Humidity</button>
+            <button class="chart-tab" onclick="switchChart('wind')" id="tab-wind">Wind</button>
+          </div>
+        </div>
+        <div class="chart-wrap">
+          <canvas id="weather-chart"></canvas>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- ───── PAGE: BULLETIN ───── -->
+  <div id="page-bulletin" class="view-page">
+    <div class="page-top-padding"></div>
+    <main class="dashboard">
+      <!-- Official Weather Bulletins -->
+      <section class="bulletins-section" id="insights">
+        <div class="section-header">
+          <div class="bulletins-header-left">
+            <div class="imd-emblem">🇮🇳</div>
+            <div>
+              <h2>📡 Official Weather Bulletins</h2>
+              <div class="bulletins-source">India Meteorological Department · Ministry of Earth Sciences</div>
+            </div>
+          </div>
+          <div class="bulletins-meta">
+            <span class="bulletin-live-dot"></span>
+            <span id="bulletin-issue-time">–</span>
+          </div>
+        </div>
+        <div class="bulletins-grid" id="bulletins-grid">
+          <!-- Populated via JS -->
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- ───── PAGE: MAP ───── -->
+  <div id="page-map" class="view-page">
+    <div class="page-top-padding"></div>
+    <main class="dashboard">
+
+      <!-- Precipitation Forecast Map -->
+      <section class="map-section" id="map">
+        <div class="section-header">
+          <h2>🌧️ Precipitation Forecast</h2>
+          <div class="precip-controls">
+            <div class="precip-range-tabs">
+              <button class="precip-tab active" id="precip-tab-3d" onclick="switchPrecipRange('3d')">3 Days</button>
+              <button class="precip-tab" id="precip-tab-7d" onclick="switchPrecipRange('7d')">7 Days</button>
+            </div>
+            <div class="precip-legend">
+              <span class="leg-item"><span class="leg-dot" style="background:#60a5fa"></span>Rain (mm)</span>
+              <span class="leg-item" id="precip-total-label"></span>
+            </div>
+          </div>
+        </div>
+        <div class="precip-chart-wrap" id="precip-chart-wrap">
+          <canvas id="precip-canvas"></canvas>
+          <div class="precip-tooltip" id="precip-tooltip"></div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+
+  <!-- ───── PAGE: MAPS ───── -->
+  <div id="page-maps" class="view-page">
+    <div class="page-top-padding"></div>
+    <main class="dashboard">
+      <section class="map-section">
+        <div class="section-header">
+          <h2>🛰️ ISRO / MOSDAC Official Maps</h2>
+          <div class="precip-controls">
+            <span class="section-badge font-orange" style="margin:0;">External Links</span>
+          </div>
+        </div>
+        <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 24px; line-height: 1.5;">
+          Note: For security reasons, ISRO's MOSDAC portal strictly blocks embedding their interactive maps inside other
+          applications. Please click any map category below to open it securely in a new official window.
+        </p>
+
+
+        <style>
+          .mosdac-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 212, 255, 0.2);
+            border-color: rgba(0, 212, 255, 0.5) !important;
+          }
+        </style>
+
+        <div class="mosdac-grid"
+          style="display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 16px;">
+
+          <a href="https://www.mosdac.gov.in/internal/weather" target="_blank" class="mosdac-card"
+            style="display: block; text-decoration: none; background: var(--card-bg); border: 1px solid rgba(255,255,255,0.05); border-radius: 12px; overflow: hidden; transition: 0.2s; text-align: center;">
+            <div
+              style="height: 120px; background: linear-gradient(135deg, #1e3a8a, #3b82f6); display:flex; align-items:center; justify-content:center; font-size: 3rem; text-shadow: 0 4px 12px rgba(0,0,0,0.5);">
+              🏙️</div>
+            <div
+              style="padding: 12px; font-weight: 700; color: #fff; font-size: 0.85rem; background: rgba(0,0,0,0.4); letter-spacing: 0.5px;">
+              CITY WEATHER</div>
+          </a>
+
+
+
+          <a href="https://www.mosdac.gov.in/internal/cyclone" target="_blank" class="mosdac-card"
+            style="display: block; text-decoration: none; background: var(--card-bg); border: 1px solid rgba(255,255,255,0.05); border-radius: 12px; overflow: hidden; transition: 0.2s; text-align: center;">
+            <div
+              style="height: 120px; background: linear-gradient(135deg, #1e293b, #475569); display:flex; align-items:center; justify-content:center; font-size: 3rem; text-shadow: 0 4px 12px rgba(0,0,0,0.5);">
+              🌀</div>
+            <div
+              style="padding: 12px; font-weight: 700; color: #fff; font-size: 0.85rem; background: rgba(0,0,0,0.4); letter-spacing: 0.5px;">
+              CYCLONE</div>
+          </a>
+
+          <a href="https://www.mosdac.gov.in/internal/heat-cold-wave" target="_blank" class="mosdac-card"
+            style="display: block; text-decoration: none; background: var(--card-bg); border: 1px solid rgba(255,255,255,0.05); border-radius: 12px; overflow: hidden; transition: 0.2s; text-align: center;">
+            <div
+              style="height: 120px; background: linear-gradient(135deg, #7f1d1d, #ef4444); display:flex; align-items:center; justify-content:center; font-size: 3rem; text-shadow: 0 4px 12px rgba(0,0,0,0.5);">
+              🔥</div>
+            <div
+              style="padding: 12px; font-weight: 700; color: #fff; font-size: 0.85rem; background: rgba(0,0,0,0.4); letter-spacing: 0.5px;">
+              HEAT WAVES</div>
+          </a>
+
+          <a href="https://www.mosdac.gov.in/heavy-rain" target="_blank" class="mosdac-card"
+            style="display: block; text-decoration: none; background: var(--card-bg); border: 1px solid rgba(255,255,255,0.05); border-radius: 12px; overflow: hidden; transition: 0.2s; text-align: center;">
+            <div
+              style="height: 120px; background: linear-gradient(135deg, #1e3a8a, #0c4a6e); display:flex; align-items:center; justify-content:center; font-size: 3rem; text-shadow: 0 4px 12px rgba(0,0,0,0.5);">
+              🌧️</div>
+            <div
+              style="padding: 12px; font-weight: 700; color: #fff; font-size: 0.85rem; background: rgba(0,0,0,0.4); letter-spacing: 0.5px;">
+              HEAVY RAIN</div>
+          </a>
+
+          <a href="https://www.mosdac.gov.in/internal/lightning" target="_blank" class="mosdac-card"
+            style="display: block; text-decoration: none; background: var(--card-bg); border: 1px solid rgba(255,255,255,0.05); border-radius: 12px; overflow: hidden; transition: 0.2s; text-align: center;">
+            <div
+              style="height: 120px; background: linear-gradient(135deg, #4c1d95, #a855f7); display:flex; align-items:center; justify-content:center; font-size: 3rem; text-shadow: 0 4px 12px rgba(0,0,0,0.5);">
+              ⚡</div>
+            <div
+              style="padding: 12px; font-weight: 700; color: #fff; font-size: 0.85rem; background: rgba(0,0,0,0.4); letter-spacing: 0.5px;">
+              LIGHTNING</div>
+          </a>
+
+          <a href="https://www.mosdac.gov.in/internal/monsoon" target="_blank" class="mosdac-card"
+            style="display: block; text-decoration: none; background: var(--card-bg); border: 1px solid rgba(255,255,255,0.05); border-radius: 12px; overflow: hidden; transition: 0.2s; text-align: center;">
+            <div
+              style="height: 120px; background: linear-gradient(135deg, #064e3b, #10b981); display:flex; align-items:center; justify-content:center; font-size: 3rem; text-shadow: 0 4px 12px rgba(0,0,0,0.5);">
+              ⛈️</div>
+            <div
+              style="padding: 12px; font-weight: 700; color: #fff; font-size: 0.85rem; background: rgba(0,0,0,0.4); letter-spacing: 0.5px;">
+              MONSOON</div>
+          </a>
+
+
+
+          <a href="https://www.mosdac.gov.in/internal/energy" target="_blank" class="mosdac-card"
+            style="display: block; text-decoration: none; background: var(--card-bg); border: 1px solid rgba(255,255,255,0.05); border-radius: 12px; overflow: hidden; transition: 0.2s; text-align: center;">
+            <div
+              style="height: 120px; background: linear-gradient(135deg, #b45309, #fbbf24); display:flex; align-items:center; justify-content:center; font-size: 3rem; text-shadow: 0 4px 12px rgba(0,0,0,0.5);">
+              ☀️</div>
+            <div
+              style="padding: 12px; font-weight: 700; color: #fff; font-size: 0.85rem; background: rgba(0,0,0,0.4); letter-spacing: 0.5px;">
+              SOLAR & WIND</div>
+          </a>
+
+        </div>
+      </section>
+    </main>
+  </div>
+
+
+  <!-- ───── Footer ───── -->
+  <footer class="footer">
+    <div class="footer-inner">
+      <div class="footer-logo">
+        <span>🌐</span> Weather <strong>modAI</strong>
+      </div>
+      <p>AI-driven weather intelligence for a smarter, safer world.</p>
+      <p class="footer-note">Data simulated for demonstration. For production use, integrate OpenWeatherMap /
+        tomorrow.io API.</p>
+    </div>
+  </footer>
+
+
+
+  <!-- Loading Overlay -->
+  <div class="loading-overlay" id="loading-overlay">
+    <div class="loader-ring"></div>
+    <div class="loader-text">AI Analyzing Atmosphere…</div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+
+</html>
