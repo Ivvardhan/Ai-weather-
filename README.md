@@ -23,6 +23,3 @@ Since this is a static frontend application (HTML, CSS, JS), you don't need any 
 - HTML5
 - CSS3 (Vanilla, custom properties, glassmorphism)
 - JavaScript (Vanilla)
-
-## License
-MIT License
