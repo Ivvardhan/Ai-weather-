@@ -1,6 +1,6 @@
 # AI Weather App (modAI)
 
-A beautiful, modern, AI-themed weather forecasting application. It provides real-time atmospheric analysis, hourly predictions, precipitation maps, and officially sourced weather maps for an immersive meteorological experience.
+A beautiful, modern, AI-themed weather forecasting models application. It provides real-time atmospheric analysis, hourly predictions, precipitation maps, and officially sourced weather maps for an immersive meteorological experience.
 
 ## Features
 - **Real-Time Weather Analysis:** Search for any city to get current temperature, humidity, wind, and UV index.
